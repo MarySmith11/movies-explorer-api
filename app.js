@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -6,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
 const { limiter } = require('./middlewares/rate-limiter');
+const { errorHandler } = require('./middlewares/error-handler');
 const NotFoundError = require('./errors/not-found-err');
 const userAuthRouter = require('./routes/userAuth');
 const { auth } = require('./middlewares/auth');
@@ -21,8 +23,6 @@ mongoose.connect(DB_ADDRESS, {
   useUnifiedTopology: true,
 });
 
-// Ограничитель
-app.use(limiter);
 // Кросс-доменные запросы
 const corsOptions = {
   origin: [
@@ -33,10 +33,14 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+app.use(requestLogger);
+
+// Ограничитель
+app.use(limiter);
+
 app.use(helmet());
 app.use(cookieParser());
 app.use(bodyParser.json());
-app.use(requestLogger);
 
 // Регистрация/авторизация
 app.use(userAuthRouter);
@@ -65,14 +69,7 @@ app.use(errorLogger);
 
 app.use(errors());
 
-app.use((err, req, res, next) => {
-  if (!err.statusCode) {
-    res.status(500).send({ message: 'На сервере произошла ошибка' });
-  } else {
-    res.status(err.statusCode).send({ message: err.message });
-  }
-  next();
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}.`);

@@ -1,7 +1,7 @@
 const Movie = require('../models/movie');
 const BadRequestError = require('../errors/bad-request-err'); // 400
 const InternalServerError = require('../errors/internal-server-err'); // 500
-const NotFoundError = require('../errors/not-found-err'); // 404
+const BadAccessError = require('../errors/bad-access-err'); // 403
 
 module.exports.createMovie = (req, res, next) => {
   const owner = req.user._id;
@@ -44,7 +44,7 @@ module.exports.createMovie = (req, res, next) => {
 
 module.exports.deleteMovie = (req, res, next) => {
   Movie.findOneAndRemove({ _id: req.params.movieId, owner: req.user._id })
-    .orFail(new NotFoundError('Фильма с таким id у вас нет'))
+    .orFail(new BadAccessError('Фильма с таким id у вас нет'))
     .then((movie) => {
       res.send({ data: movie });
     })
