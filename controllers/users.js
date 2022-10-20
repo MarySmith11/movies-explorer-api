@@ -29,6 +29,7 @@ module.exports.createUser = (req, res, next) => {
       res.cookie('token', token, {
         maxAge: 3600000000,
         httpOnly: true,
+        domain: '.localhost:3000',
       }).status(201).send({
         data: {
           _id: user._id,
