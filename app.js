@@ -28,6 +28,7 @@ const corsOptions = {
   origin: [
     'https://marydiploma.nomoredomains.icu',
     'http://marydiploma.nomoredomains.icu',
+    'http://localhost:3000',
   ],
   credentials: true,
 };
